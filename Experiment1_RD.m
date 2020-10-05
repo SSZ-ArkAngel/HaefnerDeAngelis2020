@@ -70,7 +70,10 @@ vbl=Screen('Flip', window);
 %                   Data Logging
 %------------------------------------------------ 
 
-
+probeMotion = 0;
+opticFlowMotion = 0;
+paddleInput = 0;
+relativeTilt =0;
 
 %-------------------------------------------------
 %               Optic flow
@@ -124,6 +127,9 @@ colvect=white;
 [minsmooth,maxsmooth] = Screen('DrawDots', window)
 dot_size = min(max(dot_size, minsmooth), maxsmooth);
 
+%dataLog - pixels per frame
+opticFlowMotion = dot_speed;
+
 
 %-------------------------------------------------
 %               Target probe
@@ -137,7 +143,11 @@ dotXpos = rand * screenXpixels;
 dotYpos = rand * screenYpixels;
 probeTranslation = [dotXpos dotYpos];
 dotSizePix = 20;
+probeVelY = 1;
 %Screen('DrawDots', window, [dotXpos dotYpos], dotSizePix, dotColor, [], 2);
+
+%dataLog
+probeMotion = probeVelY;
 
 %-------------------------------------------------
 %           Screen Center
@@ -167,7 +177,8 @@ cy = screenCenterY;
 %adjustmentSteps
 
 degPerHit = 1;
-deg = 90;
+degInit = 90;
+deg = degInit;
 
 %Screen(‘DrawLine’, windowPtr [,color], fromH, fromV, toH, toV [,penWidth]);
 %Screen('DrawLines', win, [x, x ; 0, h], lw, [0, 255; 0, 255; 0, 255])
@@ -210,7 +221,7 @@ for i = 1:nframes
     
     xy = xy + dxdy; % move dots
     r = r + dr; % update polar coordinates
-    dotYpos = dotYpos + 1;
+    dotYpos = dotYpos + probeVelY;
     
     % Check if dots have gone beyond the borders of the annulus
     % maintains radial optic flow
@@ -298,6 +309,10 @@ for i = 1:nframes
                 X2 = cx - cosd(deg).*100;
                 Y2 = cy - sind(deg).*100;
                 respToBeMade = false;
+            elseif keyCode(rightKey)
+                %     input
+                paddleInput = deg;
+                respToBeMade = false;
             end
         end
     
@@ -307,6 +322,13 @@ for i = 1:nframes
    
     vbl=Screen('Flip', win, vbl + (waitframes-0.5)*ifi);
 end
+
+relativeTilt = abs(paddleInput-degInit);
+
+dataArray = [probeMotion, opticFlowMotion, paddleInput, relativeTilt];
+writecell(dataArray,'data.dat');
+
+disp(dataArray);
 
 Priority(0);
 ShowCursor;
