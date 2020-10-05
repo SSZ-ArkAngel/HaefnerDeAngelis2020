@@ -1,3 +1,5 @@
+
+
 % % Clear the workspace and the screen
 % sca;
 % close all;
@@ -8,8 +10,13 @@
 %               DELETE LATER
 %--------------------------------------------
 
-AssertOpenGL;
-Screen('Preference', 'SkipSyncTests', 0 );
+%AssertOpenGL;
+%Screen('Preference', 'SkipSyncTests', 0 );
+
+% while the code above works for single displays, I have tweaked it to
+% account for multiple ones
+
+%Screen ('Preference', 'SkipSyncTests', max(screens));
 
 
 
@@ -17,17 +24,28 @@ Screen('Preference', 'SkipSyncTests', 0 );
 %                   Set up
 %------------------------------------------------ 
 
+KbName('UnifyKeyNames')
 
 % Get the screen number (0)
 screens = Screen('Screens');
 
 % Draw to the external screen if avaliable
 screenNumber = max(screens);
+
+AssertOpenGL;
+%Screen('Preference', 'SkipSyncTests', 0 );
+
+% while the code above works for single displays, I have tweaked it to
+% account for multiple ones
+
+Screen ('Preference', 'SkipSyncTests', max(screens));
     
 % Define black and white
 white = WhiteIndex(screenNumber);
 black = BlackIndex(screenNumber);
-    
+
+[win, windowRect] = Screen('OpenWindow', screenNumber, black);
+
 [window, windowRect] = Screen('OpenWindow', screenNumber, black);
 
 % Alpha blending (smoothing) - don't worry about this
@@ -46,6 +64,11 @@ Priority(MaxPriority(window));
 
 % Initial flip
 vbl=Screen('Flip', window);
+
+
+%------------------------------------------------
+%                   Data Logging
+%------------------------------------------------ 
 
 
 
@@ -69,8 +92,8 @@ else
     dot_speed   = 7;    % dot speed (deg/sec)
     f_kill      = 0.05; % [pdf DID NOT SPECIFY] fraction of dots to kill each frame (limited lifetime)
 end
-ndots       = 300; % number of dots
-annulus_r       = 15;   % radius of  annulus (degrees)
+ndots       = 500; % number of dots
+annulus_r       = 19;   % radius of  annulus (degrees)
 dot_w       = 0.1;  % width of dot (deg)
 fix_r       = 0.15; % radius of fixation point (deg)
 
@@ -101,6 +124,67 @@ colvect=white;
 [minsmooth,maxsmooth] = Screen('DrawDots', window)
 dot_size = min(max(dot_size, minsmooth), maxsmooth);
 
+
+%-------------------------------------------------
+%               Target probe
+%------------------------------------------------
+
+rand('seed', sum(100 * clock));
+[screenXpixels, screenYpixels] = Screen('WindowSize', window);
+Screen('BlendFunction', window, GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+dotColor = [1 0 0];
+dotXpos = rand * screenXpixels;
+dotYpos = rand * screenYpixels;
+probeTranslation = [dotXpos dotYpos];
+dotSizePix = 20;
+%Screen('DrawDots', window, [dotXpos dotYpos], dotSizePix, dotColor, [], 2);
+
+%-------------------------------------------------
+%           Screen Center
+%-------------------------------------------------
+
+screenCenterX = screenXpixels/2;
+screenCenterY = screenYpixels/2;
+
+
+%------------------------------------------------
+%           Adjustable paddle
+%------------------------------------------------
+
+% A straight line at the center of the screen that can be manipulated by
+% the arrow keys.
+
+%space occupied by the line
+
+Y1 = screenCenterY - 100;
+Y2 = screenCenterY + 100;
+X1 = screenCenterX;
+X2 = screenCenterX;
+
+cx = screenCenterX;
+cy = screenCenterY;
+
+%adjustmentSteps
+
+degPerHit = 1;
+deg = 90;
+
+%Screen(‘DrawLine’, windowPtr [,color], fromH, fromV, toH, toV [,penWidth]);
+%Screen('DrawLines', win, [x, x ; 0, h], lw, [0, 255; 0, 255; 0, 255])
+
+%Screen('DrawLine', win, uint8(white), lineY1, lineX1, lineY2, lineX2, 2);
+%Screen('DrawLine',window,[127],200,200, 400, 400);
+
+escapeKey = KbName('ESCAPE');
+enterKey = KbName('return');
+leftKey = KbName('LeftArrow');
+rightKey = KbName('RightArrow');
+
+%----------------------------------------
+%           Experimental loop
+%----------------------------------------
+
+
 % --------------
 % Animation loop
 % --------------
@@ -109,6 +193,7 @@ for i = 1:nframes
         %----------------
         % Fixation circle
         %----------------
+        Screen('DrawDots', window, [dotXpos dotYpos], dotSizePix, colvect, [], 2);
         Screen('FillOval', window, uint8(white), fix_cord);  % Note: 'Flip' will erase this!
         Screen('DrawDots', window, xymatrix, dot_size, colvect, center, 1);
     end
@@ -125,6 +210,7 @@ for i = 1:nframes
     
     xy = xy + dxdy; % move dots
     r = r + dr; % update polar coordinates
+    dotYpos = dotYpos + 1;
     
     % Check if dots have gone beyond the borders of the annulus
     % maintains radial optic flow
@@ -151,40 +237,76 @@ for i = 1:nframes
     vbl=Screen('Flip', window, vbl + (waitframes-0.5)*ifi);
 end
 
+%wakeup=WaitSecs(3)
+[win, windowRect] = Screen('OpenWindow', screenNumber, black);
 
+% --------------
+% Animation loop
+% --------------
+for i = 1:nframes
+    if (i>1)
+        %----------------
+        % Draw Paddle
+        %----------------
+        
+        Screen('DrawLine',win,[127],X1, Y1, X2, Y2, 5);
+        %Screen('DrawLine', win, uint8(white), lineY1, lineX1, lineY2, lineX2, 2);
+        
+    end
+    
+    [keyCode] = KbCheck;
+    
+    %Translation!!!
+    
 
+%     right
+%     deg = deg - 1;
+%     X1 = cx + cosd(deg).*100;
+%     Y1 = cy + sind(deg).*100;
+%     X2 = cx - cosd(deg).*100;
+%     Y2 = cy - sind(deg).*100;    
 
-%-------------------------------------------------
-%               Target probe
-%------------------------------------------------
+%     left
+%     deg = deg + 1;
+%     X1 = cx + cosd(deg).*100;
+%     Y1 = cy + sind(deg).*100;
+%     X2 = cx - cosd(deg).*100;
+%     Y2 = cy - sind(deg).*100;
+    
 
-
-
-
-
-%------------------------------------------------
-%           Adjustable paddle
-%------------------------------------------------
-
-
-
-
-
-
- 
-
-%----------------------------------------
-%           Experimental loop
-%----------------------------------------
-
-
-
-
-
-
-
-
-
+    respToBeMade = true;
+        while respToBeMade
+            [keyIsDown,secs, keyCode] = KbCheck;
+            if keyCode(escapeKey)
+                ShowCursor;
+                sca;
+                return
+            elseif keyCode(leftKey)
+                response = 1;
+                %     left
+                deg = deg - 1;
+                X1 = cx + cosd(deg).*100;
+                Y1 = cy + sind(deg).*100;
+                X2 = cx - cosd(deg).*100;
+                Y2 = cy - sind(deg).*100;
+                respToBeMade = false;
+            elseif keyCode(rightKey)
+                %     right
+                deg = deg + 1;
+                X1 = cx + cosd(deg).*100;
+                Y1 = cy + sind(deg).*100;
+                X2 = cx - cosd(deg).*100;
+                Y2 = cy - sind(deg).*100;
+                respToBeMade = false;
+            end
+        end
+    
+   %animation break when enter is pressed
+   
+   
+   
+    vbl=Screen('Flip', win, vbl + (waitframes-0.5)*ifi);
+end
 
 Priority(0);
 ShowCursor;
