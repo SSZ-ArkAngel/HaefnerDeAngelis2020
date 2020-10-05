@@ -91,7 +91,7 @@ t = 2*pi*rand(ndots,1);    % theta polar coordinate
 cs = [cos(t), sin(t)];
 xy = [r r] .* cs;   % dot positions in Cartesian coordinates (pixels from center)
 
-dot_direction = 2 * floor(rand(ndots,1)+0.5) - 1;    % motion direction (in or out) for each dot
+dot_direction = abs(2 * floor(rand(ndots,1)+0.5) - 1);    % motion direction (in or out) for each dot
 dr = dot_speed * dot_direction;                      % change in radius per frame (pixels)
 dxdy = [dr dr] .* cs;                       % change in x and y per frame (pixels)
 
@@ -189,4 +189,3 @@ end
 Priority(0);
 ShowCursor;
 sca;
-
