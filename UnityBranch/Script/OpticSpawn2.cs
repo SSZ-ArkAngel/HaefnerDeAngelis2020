@@ -14,8 +14,21 @@ public class OpticSpawn2 : SpawnZone
     public Transform prefab;
     public int cloudParticleCount;
 
-    //The following vector is used to instantiate each transform
+    // The following vector is used to instantiate each transform
     Vector3 p = Vector3.zero;
+
+    
+    //PlayerScript egoMotion = cameraController.GetComponent<EgoMotion>();
+    public float apertureSize;
+
+    //Vector3 probeTransformation = cameraController.GetComponent<EgoMotion>().probeTransform;
+
+    float apertureFloorX = 0.0f;
+    float apertureCeilingX = 0.0f;
+    float apertureFloorY = 0.0f;
+    float apertureCeilingY = 0.0f;
+
+    Vector3 probeTransformation = Vector3.zero;
 
     // The following function will attempt to find a valid spawn point for the particle
     public override Vector3 SpawnPoint
@@ -30,7 +43,8 @@ public class OpticSpawn2 : SpawnZone
             p.y = Random.Range(-outerRadius, outerRadius);
 
             // If the coordinates lie within the innerRadius, reroll for them
-            while( (p.x <= innerRadius && p.x >= -innerRadius) && (p.y <=innerRadius && p.y >= -innerRadius) )
+            while( (p.x <= innerRadius && p.x >= -innerRadius) && (p.y <=innerRadius && p.y >= -innerRadius) && !(p.x <= apertureCeilingX && p.x >= apertureFloorX) && !(p.y <= apertureCeilingY && p.y >= apertureFloorY) )
+            //while( (p.x <= innerRadius && p.x >= -innerRadius) && (p.y <=innerRadius && p.y >= -innerRadius) )
             {
                 p.x = Random.Range(-outerRadius, outerRadius);
                 p.y = Random.Range(-outerRadius, outerRadius);
@@ -46,6 +60,16 @@ public class OpticSpawn2 : SpawnZone
 
     private void Awake()
     {
+        // Reading variables from the CameraController script
+        GameObject cameraController = GameObject.Find("CameraController");
+
+        Vector3 probeTransformation = cameraController.GetComponent<EgoMotion>().probeTransform;
+
+        apertureFloorX = probeTransformation.x - apertureSize;
+        apertureCeilingX = probeTransformation.x + apertureSize;
+        apertureFloorY = probeTransformation.y - apertureSize;
+        apertureCeilingY = probeTransformation.x + apertureSize;
+        
         // This code will attempt to instantiate the prefabs
         for (int i = 1; i <= cloudParticleCount; i++)
         {
