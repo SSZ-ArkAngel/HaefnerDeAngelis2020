@@ -6,6 +6,12 @@ EditorBuildSettings:
   serializedVersion: 2
   m_Scenes:
   - enabled: 1
+    path: Assets/Scenes/Controllers/Video.unity
+    guid: ad9b5e37c10b1d340a2dc52c8fb852e9
+  - enabled: 1
+    path: Assets/Scenes/Tutorial.unity
+    guid: 05884b8c404425e4c84576416fa0c1ec
+  - enabled: 1
     path: Assets/Scenes/Controllers/Overlord.unity
     guid: c89df162a5d6084448c9f22119f733f8
   - enabled: 1

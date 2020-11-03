@@ -14,12 +14,29 @@ public class PaddleRotationV2 : MonoBehaviour
     float probeAngle;
     float reactionTime;
 
+    float fineRotation = 5;
+    float coarseRotation = 20;
+
+    public bool isSample = false;
+
+    public Vector3 sampleTransform;
+
     private Overlord volatileHunter;
+    
+    void SetSampleTransform()
+    {
+        sampleTransform.x = 0.0f;
+        sampleTransform.y = -2.0f;
+        sampleTransform.z = 2.0f;
+    }
+
     void Start()
     {   
+        SetSampleTransform();
+
         overlord = GameObject.Find("ExperimentController");
         probeAngle = overlord.GetComponent<Overlord>().probeAngle;
-        point = overlord.GetComponent<Overlord>().paddleTransform;
+        //point = overlord.GetComponent<Overlord>().paddleTransform;
         volatileHunter = overlord.GetComponent<Overlord>();
         // Overlord controllerScript = overlord.GetComponent<Overlord>();
         // controllerScript.absoluteTilt = transform.localRotation.z;
@@ -40,30 +57,36 @@ public class PaddleRotationV2 : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
+        
+        if(isSample == true)
+        {
+            point = sampleTransform;
+        }
+        
         reactionTime += Time.deltaTime;
 
         if(Input.GetKey(KeyCode.RightArrow))
         {
-            transform.RotateAround(point, Vector3.forward, 5*Time.deltaTime);
-            absoluteTilt += 5*Time.deltaTime;
+            transform.RotateAround(point, Vector3.forward, fineRotation*Time.deltaTime);
+            absoluteTilt += fineRotation*Time.deltaTime;
         }
 
         if(Input.GetKey(KeyCode.LeftArrow))
         {
-            transform.RotateAround(point, Vector3.back, 5*Time.deltaTime);
-            absoluteTilt -= 5*Time.deltaTime;
+            transform.RotateAround(point, Vector3.back, fineRotation*Time.deltaTime);
+            absoluteTilt -= fineRotation*Time.deltaTime;
         }
 
         if(Input.GetKey(KeyCode.RightArrow) && Input.GetKey(KeyCode.RightShift))
         {
-            transform.RotateAround(point, Vector3.forward, 20*Time.deltaTime);
-            absoluteTilt += 20*Time.deltaTime;
+            transform.RotateAround(point, Vector3.forward, coarseRotation*Time.deltaTime);
+            absoluteTilt += coarseRotation*Time.deltaTime;
         }
 
         if(Input.GetKey(KeyCode.LeftArrow) && Input.GetKey(KeyCode.RightShift))
         {
-            transform.RotateAround(point, Vector3.back, 20*Time.deltaTime);
-            absoluteTilt -= 20*Time.deltaTime;
+            transform.RotateAround(point, Vector3.back, coarseRotation*Time.deltaTime);
+            absoluteTilt -= coarseRotation*Time.deltaTime;
         }
 
         if(Input.GetKey(KeyCode.Return))

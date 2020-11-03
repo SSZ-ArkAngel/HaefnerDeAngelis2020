@@ -10,7 +10,7 @@ public class OpticSpawn2 : SpawnZone
     public float innerRadius = 0.5f;
 
     // This reference accounts for the maximal extent of optic flow generation. Account for FOV. A value of '10' should be sufficient.
-    public float outerRadius = 10f;
+    public float outerRadius = 20f;
     
     
     //Density = 100 per slice (i.e per Z unit)

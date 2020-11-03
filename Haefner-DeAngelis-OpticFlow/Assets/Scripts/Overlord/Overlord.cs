@@ -103,7 +103,7 @@ public class Overlord : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        if(Input.GetKey(KeyCode.Home))
+        if(Input.GetKey(KeyCode.Return))
         {
             SceneManager.LoadScene("Fixation");
         }
