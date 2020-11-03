@@ -38,6 +38,13 @@ public class TutorialController : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
+        
+        if(Input.GetKey(KeyCode.Escape))
+        {
+            //volatileHunter.ExportData();
+            SceneManager.LoadScene("Overlord");
+        }
+
         if(tutorialKey != 1)
         {
             fixationText.text = "";

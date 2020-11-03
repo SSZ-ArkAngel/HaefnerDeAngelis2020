@@ -26,7 +26,11 @@ public class VideoController : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        
+        if(Input.GetKey(KeyCode.Escape))
+        {
+            //volatileHunter.ExportData();
+            SceneManager.LoadScene("Tutorial");
+        }
     }
 
     public IEnumerator WaitForMovieEnd()
