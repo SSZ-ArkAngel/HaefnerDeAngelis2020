@@ -19,3 +19,7 @@ LocalFlow,3,0,-31.26445,6,-15,-46.26445,2.902422,2,0.07764572,-0.2897778,1,0,0.9
 GlobalFlow,3,1,20.13885,7,-15,5.138855,1.247654,2,0.07764572,-0.2897778,1,0,0.9223543,-0.2897778,7,
 GlobalFlow,1,0,-45.04879,8,15,-30.04879,1.673023,2,-0.07764572,-0.2897778,1,0,1,0.2,7,
 FullFlow1,0,1,10.14309,9,-15,-4.856912,0.7861537,2,0.07764572,-0.2897778,1,0,0.9223543,-0.2897778,6,
+conditionName,apertureDegree,probeEccentricity,relativeTilt,trialNumber,probeAngle,absoluteTilt,reactionTime,stimulusTime,probeVelX,probeVelY,probeStartLocationX,probeStartLocationY,probeEndLocationX,probeEndLocationY,sceneIndex,paddleRotation
+FullFlow1,3,0,15.0947,1,15,30.0947,4.10604,2,-0.07764572,-0.2897778,1,0,1,0.2,6,16.08412,
+FullFlow1,2,0,15.93896,2,15,30.93896,4.832938,2,-0.07764572,-0.2897778,1,0,1,0.2,6,-49.28386,
+FullFlow1,0,1,0.4398804,3,0,0.4398804,3.317452,2,0,-0.3,1,0,1,-0.3,6,1.190591,

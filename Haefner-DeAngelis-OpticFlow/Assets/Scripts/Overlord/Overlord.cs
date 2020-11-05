@@ -26,6 +26,7 @@ public class Overlord : MonoBehaviour
     public float apertureDegree;
     public float absoluteTilt;
     public float relativeTilt;
+    public float paddleRotation;
     public float probeEccentricity;
     // public float radialFlowAtStart;
     // public float radialFlowAtEnd;
@@ -49,8 +50,8 @@ public class Overlord : MonoBehaviour
     //     Sinbad.CsvUtil.SaveObject(obj, "subjectData.csv");
     // }
 
-    string[] volatileData = new string[16];
-    int varCount = 16;
+    string[] volatileData = new string[17];
+    int varCount = 17;
 
     public void InitializeData()
     {
@@ -70,6 +71,7 @@ public class Overlord : MonoBehaviour
         volatileData[13] = ""+probeEndLocationX;
         volatileData[14] = ""+probeEndLocationY;
         volatileData[15] = ""+sceneIndex;
+        volatileData[16] = ""+paddleRotation;
     }
 
     public void WriteData()
@@ -90,6 +92,17 @@ public class Overlord : MonoBehaviour
 
         trialNumber += 1;
     }
+
+    void WriteHeader()
+    {
+        using (StreamWriter sw = File.AppendText(Application.dataPath + "SubjectData.csv"))
+        {
+            sw.Write("conditionName,apertureDegree,probeEccentricity,relativeTilt,trialNumber,probeAngle,absoluteTilt,reactionTime,stimulusTime,probeVelX,probeVelY,probeStartLocationX,probeStartLocationY,probeEndLocationX,probeEndLocationY,sceneIndex,paddleRotation");
+            sw.Write("\n");
+            sw.Close();
+        }
+        
+    }
     
     void Awake()
     {
@@ -98,6 +111,7 @@ public class Overlord : MonoBehaviour
     void Start()
     {
         //InitializeData();
+        WriteHeader();
     }
 
     // Update is called once per frame

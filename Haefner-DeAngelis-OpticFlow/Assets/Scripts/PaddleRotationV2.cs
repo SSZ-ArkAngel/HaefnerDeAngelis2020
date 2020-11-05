@@ -11,6 +11,7 @@ public class PaddleRotationV2 : MonoBehaviour
     GameObject paddle;
     float absoluteTilt;
     float relativeTilt;
+    float paddleRotation;
     float probeAngle;
     float reactionTime;
 
@@ -68,36 +69,58 @@ public class PaddleRotationV2 : MonoBehaviour
         if(Input.GetKey(KeyCode.RightArrow))
         {
             transform.RotateAround(point, Vector3.forward, fineRotation*Time.deltaTime);
-            absoluteTilt += fineRotation*Time.deltaTime;
+            paddleRotation += fineRotation*Time.deltaTime;
         }
 
         if(Input.GetKey(KeyCode.LeftArrow))
         {
             transform.RotateAround(point, Vector3.back, fineRotation*Time.deltaTime);
-            absoluteTilt -= fineRotation*Time.deltaTime;
+            paddleRotation -= fineRotation*Time.deltaTime;
         }
 
         if(Input.GetKey(KeyCode.RightArrow) && Input.GetKey(KeyCode.RightShift))
         {
             transform.RotateAround(point, Vector3.forward, coarseRotation*Time.deltaTime);
-            absoluteTilt += coarseRotation*Time.deltaTime;
+            paddleRotation += coarseRotation*Time.deltaTime;
         }
 
         if(Input.GetKey(KeyCode.LeftArrow) && Input.GetKey(KeyCode.RightShift))
         {
             transform.RotateAround(point, Vector3.back, coarseRotation*Time.deltaTime);
-            absoluteTilt -= coarseRotation*Time.deltaTime;
+            paddleRotation -= coarseRotation*Time.deltaTime;
         }
 
         if(Input.GetKey(KeyCode.Return))
         {
             // Start();
             //write angles
-            //absoluteTilt = -transform.localRotation.z;
+            //absoluteTilt = -transform.localRotation.z;           
+            //absoluteTilt = transform.rotation.eulerAngles.z;
+            Vector3 paddleRotationArray = transform.localRotation.eulerAngles;
+
+            //absoluteTilt = (paddleRotationArray.z - 360f);
+
+            if(paddleRotationArray.z > 180f)
+            {
+                absoluteTilt = -(paddleRotationArray.z - 360);
+            }
+            if(paddleRotationArray.z < 180f)
+            {
+                absoluteTilt = -(paddleRotationArray.z);
+            }
+            if(paddleRotationArray.z == 180f)
+            {
+                absoluteTilt = 180f;
+            }   
+
             relativeTilt = absoluteTilt - probeAngle;
+
+            Debug.Log("Rotation: " + absoluteTilt);
+
             //export angles
             overlord.GetComponent<Overlord>().absoluteTilt = absoluteTilt;
             overlord.GetComponent<Overlord>().relativeTilt = relativeTilt;
+            overlord.GetComponent<Overlord>().paddleRotation = paddleRotation;
 
             //write and export reaction time
             overlord.GetComponent<Overlord>().reactionTime = reactionTime;
@@ -113,6 +136,11 @@ public class PaddleRotationV2 : MonoBehaviour
         {
             //volatileHunter.ExportData();
             Application.Quit();
+        }
+
+        if(Input.GetKey(KeyCode.Home))
+        {
+            //Debug.Log("Rotation: " + absoluteTilt);
         }
     }
 }
