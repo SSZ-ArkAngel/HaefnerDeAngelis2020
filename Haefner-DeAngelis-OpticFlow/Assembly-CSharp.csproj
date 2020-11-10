@@ -62,6 +62,7 @@
      <Compile Include="Assets\CSV Trial Logger\Example\Scripts\TrialNumberDisplay.cs" />
      <Compile Include="Assets\CSV Trial Logger\Scripts\TrialLogger.cs" />
      <Compile Include="Assets\Game.cs" />
+     <Compile Include="Assets\Scripts\Collidor.cs" />
      <Compile Include="Assets\Scripts\EgoMotion.cs" />
      <Compile Include="Assets\Scripts\EnterToContinue.cs" />
      <Compile Include="Assets\Scripts\ExperimentProgressDisplay.cs" />

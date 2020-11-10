@@ -8,7 +8,7 @@ public class ProbeMotion : MonoBehaviour
     float motionAngle = 0;
     float motionAngleRad;
 
-    public float probeSpeed = -0.2f;
+    public float probeSpeed = -0.09f;
     float xMotion;
     float yMotion;
 
@@ -43,7 +43,7 @@ public class ProbeMotion : MonoBehaviour
     void Awake()
     {
         // Override
-        probeSpeed = -0.3f;
+        probeSpeed = -0.09f;
     }
     
     void Start()
