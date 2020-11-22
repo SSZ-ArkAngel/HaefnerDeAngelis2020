@@ -385,12 +385,22 @@ MonoBehaviour:
   apertureDegree: 0
   absoluteTilt: 0
   relativeTilt: 0
+  paddleRotation: 0
   probeEccentricity: 0
   reactionTime: 0
   stimulusTime: 0
   paddleTransform: {x: 0, y: 0, z: 0}
   trialNumber: 1
   timeElapsed: 0
+  dotsPerInch: 0
+  dotsPerCM: 0
+  screenWidthPixels: 0
+  screenWidth: 0
+  unitsPerDegree: 0
+  unitsPerCM: 0
+  oneDegree: 0
+  oneCM: 0
+  viewPortScale: 0
 --- !u!1 &1742030204
 GameObject:
   m_ObjectHideFlags: 0

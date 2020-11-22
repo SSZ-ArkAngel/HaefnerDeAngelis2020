@@ -42,8 +42,10 @@ public class ProbeMotion : MonoBehaviour
     
     void Awake()
     {
-        // Override
-        probeSpeed = -0.09f;
+        // Override 0.65 deg/s
+
+        overlord = GameObject.Find("ExperimentController");
+        probeSpeed = overlord.GetComponent<Overlord>().oneDegree * (-0.65f);
     }
     
     void Start()
