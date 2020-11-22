@@ -15,8 +15,8 @@ public class PaddleRotationV2 : MonoBehaviour
     float probeAngle;
     float reactionTime;
 
-    float fineRotation = 5;
-    float coarseRotation = 20;
+    float fineRotation = 20;
+    float coarseRotation = 80;
 
     public bool isSample = false;
 
@@ -115,7 +115,9 @@ public class PaddleRotationV2 : MonoBehaviour
 
             relativeTilt = absoluteTilt - probeAngle;
 
-            Debug.Log("Rotation: " + absoluteTilt);
+            // Debug.Log("Rotation: " + absoluteTilt);
+            string conditionName = overlord.GetComponent<Overlord>().conditionName;
+            Debug.Log("Scene:" + conditionName);
 
             //export angles
             overlord.GetComponent<Overlord>().absoluteTilt = absoluteTilt;

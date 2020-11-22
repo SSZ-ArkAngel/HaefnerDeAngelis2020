@@ -38,7 +38,80 @@ public class Overlord : MonoBehaviour
     public int trialNumber = 1;
 
     public float timeElapsed = 0.0f;
+
+    public float dotsPerInch;
+    public float dotsPerCM;
+    public float screenWidthPixels;
+    public float screenWidth;
+
+    public float unitsPerDegree;
+    public float unitsPerCM;
+
+    float nearClipPlane = 2f;
+    float horizontalFOV = 90f;
+    float unitsPerScreen;
+
+    public float oneDegree;
+    public float oneCM;
+
+    public float viewPortScale;
+
     
+    public void ScreenReader()
+    {
+        dotsPerInch = Screen.dpi;
+        dotsPerCM = dotsPerInch/2.54f;
+        screenWidthPixels = Screen.width;
+        screenWidth = screenWidthPixels/dotsPerCM;
+
+        
+
+        // Here we will convert to all quantities
+
+        // Units per degree is overwritten
+        //unitsPerDegree = 0.045f;
+
+        //UnitScreenConversions
+        UnityUnits();
+
+        //Screen = 90 degrees
+        unitsPerCM = unitsPerScreen/screenWidth;
+        unitsPerDegree = unitsPerCM;
+
+        oneDegree = unitsPerDegree;
+        oneCM = unitsPerCM;
+
+        //degrees per cm = unitsPerDegree/unitsPerCM
+
+    }
+
+    public void ViewPortCalculation()
+    {
+        // For the viewport 1.275 unit = 1/3 of the screen
+        // 1 screen = 3.825 units (almost 4) hmm...
+        // To get the calculations done
+        // Read screen size, convert 30 degrees to cm, then get a ration
+
+        //At 56 cm away 1 deg = 1 cm use this
+
+        float thirtyDegreesInCM;
+
+        //ratio with screensize
+
+        float apertureScreenRatio = 30f/screenWidth;
+
+        viewPortScale = 3.825f * apertureScreenRatio;
+
+    }
+
+    public void UnityUnits()
+    {
+        // Override as the FOV is fixed at 90H
+        unitsPerScreen = nearClipPlane*2f;
+    }
+
+    // All setup variables are stored here in degrees
+
     // Order
     // Condition, Aperture, Eccentricity, Relative Tilt, Misc Raw Data    
     // void ExportDataToCSV()
@@ -107,11 +180,17 @@ public class Overlord : MonoBehaviour
     void Awake()
     {
         DontDestroyOnLoad(gameObject);
+        WriteHeader();
+        ScreenReader();
+        ViewPortCalculation();
+        UnityUnits();
     }
     void Start()
     {
         //InitializeData();
-        WriteHeader();
+
+        Debug.Log("Screen Size: " + screenWidth);
+        Debug.Log("Conversions: CM " + oneCM + " Degrees " + oneDegree + "port " + viewPortScale);
     }
 
     // Update is called once per frame

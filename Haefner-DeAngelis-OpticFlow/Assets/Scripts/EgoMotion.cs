@@ -4,7 +4,7 @@ using UnityEngine;
 using UnityEngine.SceneManagement;
 
 public class EgoMotion : MonoBehaviour
-{
+{ 
     float delay = 2;
     public float egoVelocity;
 
@@ -43,6 +43,8 @@ public class EgoMotion : MonoBehaviour
     float probeEndLocationY;
     public Vector3 paddleTransform;
 
+    float probeDegreeScale = 0.5f;
+
     int apertureScaleIndex;
     int eccentricityScaleIndex;
     // Conditions:
@@ -52,9 +54,9 @@ public class EgoMotion : MonoBehaviour
 
     float distanceMovedByProbeY;
     float distanceMovedByProbeX;
-    void probeTrajectoryCalculator()
+    void probeTrajectoryCalculator()//Scale for screen size
     {
-        distanceMovedByProbeY = 0.2f;
+        distanceMovedByProbeY = 0.09f;
         distanceMovedByProbeX = 0.0f;
         float probeTrajectoryCalculatorAngle = Mathf.PI;
         float probeSpeedForTrajectory = GameObject.Find("OpticProbe(Clone)").GetComponent<ProbeMotion>().probeSpeed;
@@ -83,11 +85,28 @@ public class EgoMotion : MonoBehaviour
 
     }
     
-    void RNGesus()
+    void RNGesus() //Scale to screen size
     {
 
+        float oneCM = overlord.GetComponent<Overlord>().oneCM;
+
+        //speed selector
+        if(Exp1 == true)
+        {
+            egoVelocity = 59 * oneCM;
+        }
+
+        if(Exp1 == false)
+        {
+            egoVelocity = 10 * oneCM;
+        }
+        
         apertureScaleIndex = Random.Range(0,4);
         eccentricityScaleIndex = Random.Range(0,2);
+
+        //probe size = 1 degree
+        
+        float oneDegree = overlord.GetComponent<Overlord>().oneDegree;
 
         if(publicOverride==false)
         {
@@ -95,45 +114,62 @@ public class EgoMotion : MonoBehaviour
             {
                 //Eccentricity Set Constant @ (1,0,2)
                 // probeTransform = (1.0f, 0.0f, 2.0f);
-                probeTransform.x = 1.0f;
+                // probeTransform.x = 0.18f;
+                probeTransform.x = 2 * oneDegree;
                 probeTransform.y = 0.0f;
                 probeTransform.z = 2.0f;
 
                 if(apertureScaleIndex==0)
                 {
                     // apertureScale = (0.4f, 0.4f, 0.01f);
-                    apertureScale.x = 0.4f;
-                    apertureScale.y = 0.4f;
+                    // apertureScale.x = 0.18f;
+                    // apertureScale.y = 0.18f;
+                    // apertureScale.z = 0.01f;
+
+                    apertureScale.x = (1) * oneDegree;
+                    apertureScale.y = (1) * oneDegree;
                     apertureScale.z = 0.01f;
                 }
 
                 if(apertureScaleIndex==1)
                 {
                     // apertureScale = (0.5f, 0.5f, 0.01f);
-                    apertureScale.x = 0.5f;
-                    apertureScale.y = 0.5f;
+                    // apertureScale.x = 0.27f;
+                    // apertureScale.y = 0.27f;
+                    // apertureScale.z = 0.01f;
+
+                    apertureScale.x = (1.5f) * oneDegree;
+                    apertureScale.y = (1.5f) * oneDegree;
                     apertureScale.z = 0.01f;
                 }
 
                 if(apertureScaleIndex==2)
                 {
                     // apertureScale = (0.6f, 0.6f, 0.01f);
-                    apertureScale.x = 0.6f;
-                    apertureScale.y = 0.6f;
+                    // apertureScale.x = 0.315f;
+                    // apertureScale.y = 0.315f;
+                    // apertureScale.z = 0.01f;
+
+                    apertureScale.x = (2f) * oneDegree;
+                    apertureScale.y = (2f) * oneDegree;
                     apertureScale.z = 0.01f;
                 }
 
                 if(apertureScaleIndex==3)
                 {
                     // apertureScale = (0.7f,0.7f, 0.01f);
-                    apertureScale.x = 0.8f;
-                    apertureScale.y = 0.8f;
+                    // apertureScale.x = 0.36f;
+                    // apertureScale.y = 0.36f;
+                    // apertureScale.z = 0.01f;
+
+                    apertureScale.x = (4f) * oneDegree;
+                    apertureScale.y = (4f) * oneDegree;
                     apertureScale.z = 0.01f;
                 }
                 
             }
 
-            if(Exp1==false)
+            if(Exp1==false) //scale for
             {
                 // Aperture is constat @ (0.0f, 0.0f, 0.0f)
                 apertureScale.x = 0.0f;
@@ -143,7 +179,8 @@ public class EgoMotion : MonoBehaviour
                 if(eccentricityScaleIndex==0)
                 {
                     // transform = (1, 0, 2)
-                    probeTransform.x = 1.0f;
+                    // probeTransform.x = 0.18f;
+                    probeTransform.x = 2f * oneDegree;
                     probeTransform.y = 0.0f;
                     probeTransform.z = 2.0f;
                 }
@@ -151,7 +188,8 @@ public class EgoMotion : MonoBehaviour
                 if(eccentricityScaleIndex==1)
                 {
                     // transform = (1.5, 0, 2)
-                    probeTransform.x = 1.5f;
+                    // probeTransform.x = 0.36f;
+                    probeTransform.x = 4f * oneDegree;
                     probeTransform.y = 0.0f;
                     probeTransform.z = 2.0f;
                 }
@@ -163,7 +201,7 @@ public class EgoMotion : MonoBehaviour
     {
         
         // Override
-        egoVelocity = 16.0f;
+        egoVelocity = 10.0f;
         
         overlord = GameObject.Find("ExperimentController");
         
@@ -175,6 +213,12 @@ public class EgoMotion : MonoBehaviour
         {
         Transform probe = Instantiate(probePrefab);
         probe.localPosition = probeTransform;
+
+        float oneDegree = overlord.GetComponent<Overlord>().oneDegree;
+        Vector3 probeScale = new Vector3(oneDegree*probeDegreeScale, oneDegree*probeDegreeScale, 0.01f);
+        probe.localScale = probeScale;
+
+
         probe.transform.parent = motionController.transform; 
         paddleTransform = probeTransform;
         overlord.GetComponent<Overlord>().paddleTransform = paddleTransform;
