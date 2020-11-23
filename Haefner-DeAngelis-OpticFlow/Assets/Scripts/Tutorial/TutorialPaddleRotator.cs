@@ -18,22 +18,22 @@ public class TutorialPaddleRotator : MonoBehaviour
         
         if(Input.GetKey(KeyCode.RightArrow))
         {
-            transform.RotateAround(point, Vector3.forward, 5*Time.deltaTime);
+            transform.RotateAround(point, Vector3.forward, 20*Time.deltaTime);
         }
 
         if(Input.GetKey(KeyCode.LeftArrow))
         {
-            transform.RotateAround(point, Vector3.back, 5*Time.deltaTime);
+            transform.RotateAround(point, Vector3.back, 20*Time.deltaTime);
         }
 
         if(Input.GetKey(KeyCode.RightArrow) && Input.GetKey(KeyCode.RightShift))
         {
-            transform.RotateAround(point, Vector3.forward, 20*Time.deltaTime);
+            transform.RotateAround(point, Vector3.forward, 80*Time.deltaTime);
         }
 
         if(Input.GetKey(KeyCode.LeftArrow) && Input.GetKey(KeyCode.RightShift))
         {
-            transform.RotateAround(point, Vector3.back, 20*Time.deltaTime);
+            transform.RotateAround(point, Vector3.back, 80*Time.deltaTime);
         }
     }
 }
