@@ -283,6 +283,8 @@ public class EgoMotion : MonoBehaviour
 
         //write probe transform to place paddle
         overlord.GetComponent<Overlord>().paddleTransform = paddleTransform;
+
+        Debug.Log("Ego-Motion: " + egoVelocity);
         
 
 
