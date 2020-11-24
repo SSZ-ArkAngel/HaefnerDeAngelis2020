@@ -76,7 +76,7 @@ public class Overlord : MonoBehaviour
 
         //Screen = 90 degrees
         unitsPerCM = unitsPerScreen/screenWidth;
-        unitsPerDegree = unitsPerCM;
+        unitsPerDegree = 4f / 30f;
 
         oneDegree = unitsPerDegree;
         oneCM = unitsPerCM;
@@ -98,7 +98,8 @@ public class Overlord : MonoBehaviour
 
         //ratio with screensize
 
-        float apertureScreenRatio = 30f/screenWidth;
+        // float apertureScreenRatio = 30f/screenWidth;
+        float apertureScreenRatio = 16f / 18f;
 
         viewPortScale = 3.825f * apertureScreenRatio;
 

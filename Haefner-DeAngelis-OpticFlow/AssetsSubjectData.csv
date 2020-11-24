@@ -287,3 +287,14 @@ LocalFlow,2,1,-60.8823,11,15,-45.8823,0.0327388,2,-0.01241873,-0.04634732,0.1476
 LocalFlow,0,0,-19.54572,12,-15,-34.54572,0.1473294,2,0.01241873,-0.04634732,0.1476378,0,0.1352191,-0.04634732,8,0,
 GlobalFlow,3,1,24.62677,13,-15,9.62677,0.2958693,2,0.01241873,-0.04634732,0.1476378,0,0.1352191,-0.04634732,7,0,
 conditionName,apertureDegree,probeEccentricity,relativeTilt,trialNumber,probeAngle,absoluteTilt,reactionTime,stimulusTime,probeVelX,probeVelY,probeStartLocationX,probeStartLocationY,probeEndLocationX,probeEndLocationY,sceneIndex,paddleRotation
+conditionName,apertureDegree,probeEccentricity,relativeTilt,trialNumber,probeAngle,absoluteTilt,reactionTime,stimulusTime,probeVelX,probeVelY,probeStartLocationX,probeStartLocationY,probeEndLocationX,probeEndLocationY,sceneIndex,paddleRotation
+ControlCondition,3,0,6.26229,1,-15,-8.73771,0.8801685,2,0.01241873,-0.04634732,0.1476378,0,0.1352191,-0.04634732,3,0,
+conditionName,apertureDegree,probeEccentricity,relativeTilt,trialNumber,probeAngle,absoluteTilt,reactionTime,stimulusTime,probeVelX,probeVelY,probeStartLocationX,probeStartLocationY,probeEndLocationX,probeEndLocationY,sceneIndex,paddleRotation
+ControlCondition,1,0,6.259033,1,15,21.25903,0.5570412,2,-0.02243098,-0.08371357,0.2666667,0,0.2666667,0.09,3,0,
+LocalFlow,1,0,45.08789,2,0,45.08789,0.2890049,2,0,-0.08666667,0.2666667,0,0.2666667,-0.08666667,7,0,
+ControlCondition,0,0,14.54034,3,0,14.54034,0.2630488,2,0,-0.08666667,0.2666667,0,0.2666667,-0.08666667,3,0,
+GlobalFlow,2,1,52.43771,4,-15,37.43771,0.3646444,2,0.02243098,-0.08371357,0.2666667,0,0.2442357,-0.08371357,6,0,
+FullFlow1,1,0,-17.02187,5,15,-2.021874,0.30016,2,-0.02243098,-0.08371357,0.2666667,0,0.2666667,0.09,5,0,
+FullFlow1,1,0,-41.9027,6,15,-26.9027,0.3152672,2,-0.02243098,-0.08371357,0.2666667,0,0.2666667,0.09,5,0,
+LocalFlow,3,1,43.65601,7,-15,28.65601,0.2777228,2,0.02243098,-0.08371357,0.2666667,0,0.2442357,-0.08371357,7,0,
+LocalFlow,2,1,-22.08215,8,0,-22.08215,0.3173247,2,0,-0.08666667,0.2666667,0,0.2666667,-0.08666667,7,0,
