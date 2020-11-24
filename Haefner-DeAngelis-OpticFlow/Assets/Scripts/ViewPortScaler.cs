@@ -17,9 +17,9 @@ public class ViewPortScaler : MonoBehaviour
         
         Vector3 scale = viewport.GetComponent<Transform>().localScale;
 
-        scale.x = viewPortScale;
+        scale.x = 2f;
         scale.y = 0.01f;
-        scale.z = viewPortScale;
+        scale.z = 2f;
 
         viewport.GetComponent<Transform>().localScale = scale;
         

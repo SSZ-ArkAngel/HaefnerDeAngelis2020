@@ -99,7 +99,7 @@ public class Overlord : MonoBehaviour
         //ratio with screensize
 
         // float apertureScreenRatio = 30f/screenWidth;
-        float apertureScreenRatio = 16f / 18f;
+        float apertureScreenRatio = 14f/18f;
 
         viewPortScale = 3.825f * apertureScreenRatio;
 
