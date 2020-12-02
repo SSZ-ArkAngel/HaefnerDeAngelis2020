@@ -1,0 +1,238 @@
+---
+title: "BCS 206 Experiment 1"
+author: "Ji-Ze Jang"
+date: "12/02/2020"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## R Markdown
+
+This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+
+When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
+
+
+This is the pipeline for Experiment 1 **(n=1)**. No error bars. Not piped.
+```{r}
+####################################################################
+# This is a sample plot for Experiment 1, for 1 individual subject #
+# The code is redundant because I am writing out each step I take. #
+####################################################################
+
+library(tidyverse)
+Exp1_subject <- as_tibble(read.csv("D:/Users/user/R-workspace/Subject1_EXP1.csv"))
+Exp1_subject
+
+Exp1_subject$apertureDegree <- factor(Exp1_subject$apertureDegree, 
+                                        levels = c(0, 1, 2, 3),
+                                        labels = c("1", "1.5", "2", "4"))
+
+# Tease out Control condition
+Control1 = filter(Exp1_subject, conditionName == "ControlCondition")
+Control1
+
+# Tease out Full condition
+Full1 = filter(Exp1_subject, conditionName == "FullFlow1")
+Full1
+
+# Tease out Local condition
+Local1 = filter(Exp1_subject, conditionName == "LocalFlow")
+Local1
+
+# Tease out Global condition
+Global1 = filter(Exp1_subject, conditionName == "GlobalFlow")
+Global1
+
+# Plot aperture size vs. (avg) relative tilt for each condition
+
+# The average is taken across each condition, regardless of aperture size
+Control1_averaged = mean(Control1$relativeTilt)
+Full1_averaged = mean(Full1$relativeTilt)
+
+# The average is taken across each condition, for each aperture size
+Local1_averaged = aggregate(Local1[, 4], list(Local1$apertureDegree), mean)
+Global1_averaged = aggregate(Global1[, 4], list(Global1$apertureDegree), mean)
+
+# Create new data frame, appending each condition separately
+data1 <- data.frame("Condition"="Control", "apertureDegree" = c(1, 1.5, 2, 4), "relativeTilt"= Control1_averaged)
+# data1 <- data.frame("Condition"="Control", "apertureDegree" = 0, "relativeTilt"= Control1_averaged)
+data2 <- data.frame("Condition"="Full", "apertureDegree" = c(1, 1.5, 2, 4), "relativeTilt"= Full1_averaged)
+# data2 <- data.frame("Condition"="Full", "apertureDegree" = 0, "relativeTilt"= Full1_averaged)
+data3 <- data.frame("Condition"="Local", "apertureDegree" = c(1, 1.5, 2, 4), "relativeTilt"= Local1_averaged$relativeTilt)
+data4 <- data.frame("Condition"="Global", "apertureDegree" = c(1, 1.5, 2, 4), "relativeTilt"= Global1_averaged$relativeTilt)
+
+participant_averaged_data <- rbind(data1, data2, data3, data4)
+participant_averaged_data
+
+# Create new .csv with averaged data
+write_csv(participant_averaged_data, path = "D:/Users/user/R-workspace/participant_data.csv")
+
+# Plot averaged data
+participant_averaged_data <- read.csv("D:/Users/user/R-workspace/participant_data.csv")
+
+ggplot(participant_averaged_data, aes(x=apertureDegree, y=relativeTilt, group=Condition, color=Condition)) +
+  geom_line() +
+  geom_point() +
+  labs(title="Optic Flow Experiment 1 Subject 1", x="Aperture size (deg)", y="Relative tilt (deg)")  # CHANGE FOR EACH SUBJECT!!!!!
+```
+
+
+This is the pipeline for Experiment 1 **(n=1)**. Error bars added. Not piped. [FINAL]
+```{r}
+
+library(tidyverse)
+Exp1_subject <- as_tibble(read.csv("D:/Users/user/R-workspace/Subject1_EXP1.csv"))
+Exp1_subject$apertureDegree <- factor(Exp1_subject$apertureDegree, 
+                                        levels = c(0, 1, 2, 3),
+                                        labels = c("1", "1.5", "2", "4"))
+
+Control1 = filter(Exp1_subject, conditionName == "ControlCondition")
+Full1 = filter(Exp1_subject, conditionName == "FullFlow1")
+Local1 = filter(Exp1_subject, conditionName == "LocalFlow")
+Global1 = filter(Exp1_subject, conditionName == "GlobalFlow")
+
+# Mean
+Control1_averaged = mean(Control1$relativeTilt)
+Full1_averaged = mean(Full1$relativeTilt)
+Local1_averaged = aggregate(Local1[, 4], list(Local1$apertureDegree), mean)
+Global1_averaged = aggregate(Global1[, 4], list(Global1$apertureDegree), mean)
+
+# SD
+Control1_sd = sd(Control1$relativeTilt)
+Full1_sd = sd(Control1$relativeTilt)
+Local1_sd = aggregate(Local1[, 4], list(Local1$apertureDegree), sd)
+Global1_sd = aggregate(Global1[, 4], list(Global1$apertureDegree), sd)
+
+# data1 <- data.frame("Condition"="Control", "apertureDegree" = c(1, 1.5, 2, 4), "relativeTilt"= Control1_averaged, "sd"=Control1_sd)
+data1 <- data.frame("Condition"="Control", "apertureDegree" = 0, "relativeTilt"= Control1_averaged, "sd"=Control1_sd) # added sd
+# data2 <- data.frame("Condition"="Full", "apertureDegree" = c(1, 1.5, 2, 4), "relativeTilt"= Full1_averaged, "sd"=Full1_sd)
+data2 <- data.frame("Condition"="Full", "apertureDegree" = 0, "relativeTilt"= Full1_averaged, "sd"=Full1_sd) # added sd
+data3 <- data.frame("Condition"="Local", "apertureDegree" = c(1, 1.5, 2, 4), "relativeTilt"= Local1_averaged$relativeTilt, "sd"=Local1_sd$relativeTilt)
+data4 <- data.frame("Condition"="Global", "apertureDegree" = c(1, 1.5, 2, 4), "relativeTilt"= Global1_averaged$relativeTilt, "sd"=Global1_sd$relativeTilt)
+
+participant_averaged_data <- rbind(data1, data2, data3, data4)
+
+write_csv(participant_averaged_data, path = "D:/Users/user/R-workspace/participant_data.csv")
+
+# Plot with error bars
+participant_averaged_data <- read.csv("D:/Users/user/R-workspace/participant_data.csv")
+
+ggplot(participant_averaged_data, aes(x=apertureDegree, y=relativeTilt, group=Condition, color=Condition)) +
+  geom_line() +
+  geom_point() +
+  geom_errorbar(aes(ymin=relativeTilt-sd, ymax=relativeTilt+sd), width=.15, position=position_dodge(0.15)) + # dodged the error bars
+  labs(title="Optic Flow Experiment 1 Subject 1", x="Aperture size (deg)", y="Relative tilt (deg)") # CHANGE FOR EACH SUBJECT!!!!!
+```
+
+
+This is the pipeline for Experiment 1 **(n=4)**. No error bars. Not piped. [FINAL]
+```{r}
+
+library(tidyverse)
+Exp1_subject1 <- as_tibble(read.csv("D:/Users/user/R-workspace/Subject1_EXP1.csv")) # Arya
+Exp1_subject2 <- as_tibble(read.csv("D:/Users/user/R-workspace/Subject2_EXP1.csv")) # Me
+Exp1_subject3 <- as_tibble(read.csv("D:/Users/user/R-workspace/Subject3_EXP1.csv")) # Yihe
+Exp1_subject4 <- as_tibble(read.csv("D:/Users/user/R-workspace/Subject4_EXP1.csv")) # Kepler
+Exp1_all <- rbind(Exp1_subject1, Exp1_subject2, Exp1_subject3, Exp1_subject4)
+
+Exp1_all$apertureDegree <- factor(Exp1_all$apertureDegree, 
+                                        levels = c(0, 1, 2, 3),
+                                        labels = c("1", "1.5", "2", "4"))
+
+# Tease out Control, Full, Local, Global conditions across all subjects
+Control1_all = filter(Exp1_all, conditionName == "ControlCondition")
+Full1_all = filter(Exp1_all, conditionName == "FullFlow1")
+Local1_all = filter(Exp1_all, conditionName == "LocalFlow")
+Global1_all = filter(Exp1_all, conditionName == "GlobalFlow")
+
+# Plot aperture size vs. (avg) relative tilt for each condition across all subjects
+
+# The average is taken across each condition, regardless of aperture size
+Control1_averaged = mean(Control1_all$relativeTilt)
+Full1_averaged = mean(Full1_all$relativeTilt)
+
+# The average is taken across each condition, for each aperture size
+Local1_averaged = aggregate(Local1_all[, 4], list(Local1_all$apertureDegree), mean)
+Global1_averaged = aggregate(Global1_all[, 4], list(Global1_all$apertureDegree), mean)
+
+# Create new data frame, appending each condition separately
+# data1 <- data.frame("Condition"="Control", "apertureDegree" = c(1, 1.5, 2, 4), "relativeTilt"= Control1_averaged)
+data1 <- data.frame("Condition"="Control", "apertureDegree" = 0, "relativeTilt"= Control1_averaged)
+# data2 <- data.frame("Condition"="Full", "apertureDegree" = c(1, 1.5, 2, 4), "relativeTilt"= Full1_averaged)
+data2 <- data.frame("Condition"="Full", "apertureDegree" = 0, "relativeTilt"= Full1_averaged)
+data3 <- data.frame("Condition"="Local", "apertureDegree" = c(1, 1.5, 2, 4), "relativeTilt"= Local1_averaged$relativeTilt)
+data4 <- data.frame("Condition"="Global", "apertureDegree" = c(1, 1.5, 2, 4), "relativeTilt"= Global1_averaged$relativeTilt)
+
+all_averaged_data <- rbind(data1, data2, data3, data4)
+
+# Create new .csv with averaged data
+write_csv(all_averaged_data, path = "D:/Users/user/R-workspace/all_averaged_data.csv")
+
+# Plot averaged data
+all_averaged_data <- read.csv("D:/Users/user/R-workspace/all_averaged_data.csv")
+all_averaged_data
+
+ggplot(all_averaged_data, aes(x=apertureDegree, y=relativeTilt, group=Condition, color=Condition)) +
+  geom_line() +
+  geom_point() +
+  labs(title="Optic Flow Experiment 1", x="Aperture size (deg)", y="Relative tilt (deg)")
+```
+
+
+This is the pipeline for Experiment 1 **(n=4)*. Error bars added. Not piped. [FINAL]
+```{r}
+
+library(tidyverse)
+Exp1_subject1 <- as_tibble(read.csv("D:/Users/user/R-workspace/Subject1_EXP1.csv")) # Arya
+Exp1_subject2 <- as_tibble(read.csv("D:/Users/user/R-workspace/Subject2_EXP1.csv")) # Me
+Exp1_subject3 <- as_tibble(read.csv("D:/Users/user/R-workspace/Subject3_EXP1.csv")) # Yihe
+Exp1_subject4 <- as_tibble(read.csv("D:/Users/user/R-workspace/Subject4_EXP1.csv")) # Kepler
+Exp1_all <- rbind(Exp1_subject1, Exp1_subject2, Exp1_subject3, Exp1_subject4)
+
+Exp1_all$apertureDegree <- factor(Exp1_all$apertureDegree, 
+                                        levels = c(0, 1, 2, 3),
+                                        labels = c("1", "1.5", "2", "4"))
+
+# Tease out Control, Full, Local, Global conditions across all subjects
+Control1_all = filter(Exp1_all, conditionName == "ControlCondition")
+Full1_all = filter(Exp1_all, conditionName == "FullFlow1")
+Local1_all = filter(Exp1_all, conditionName == "LocalFlow")
+Global1_all = filter(Exp1_all, conditionName == "GlobalFlow")
+
+# Mean
+Control1_averaged = mean(Control1_all$relativeTilt)
+Full1_averaged = mean(Full1_all$relativeTilt)
+Local1_averaged = aggregate(Local1_all[, 4], list(Local1_all$apertureDegree), mean)
+Global1_averaged = aggregate(Global1_all[, 4], list(Global1_all$apertureDegree), mean)
+
+# SD
+Control1_sd = sd(Control1_all$relativeTilt)
+Full1_sd = sd(Control1_all$relativeTilt)
+Local1_sd = aggregate(Local1_all[, 4], list(Local1_all$apertureDegree), sd)
+Global1_sd = aggregate(Global1_all[, 4], list(Global1_all$apertureDegree), sd)
+
+# data1 <- data.frame("Condition"="Control", "apertureDegree" = c(1, 1.5, 2, 4), "relativeTilt"= Control1_averaged, "sd"=Control1_sd)
+data1 <- data.frame("Condition"="Control", "apertureDegree" = 0, "relativeTilt"= Control1_averaged, "sd"=Control1_sd) # added sd
+# data2 <- data.frame("Condition"="Full", "apertureDegree" = c(1, 1.5, 2, 4), "relativeTilt"= Full1_averaged, "sd"=Full1_sd)
+data2 <- data.frame("Condition"="Full", "apertureDegree" = 0, "relativeTilt"= Full1_averaged, "sd"=Full1_sd) # added sd
+data3 <- data.frame("Condition"="Local", "apertureDegree" = c(1, 1.5, 2, 4), "relativeTilt"= Local1_averaged$relativeTilt, "sd"=Local1_sd$relativeTilt)
+data4 <- data.frame("Condition"="Global", "apertureDegree" = c(1, 1.5, 2, 4), "relativeTilt"= Global1_averaged$relativeTilt, "sd"=Global1_sd$relativeTilt)
+
+all_averaged_data <- rbind(data1, data2, data3, data4)
+
+write_csv(all_averaged_data, path = "D:/Users/user/R-workspace/all_averaged_data.csv")
+
+# Plot with error bars
+all_averaged_data <- read.csv("D:/Users/user/R-workspace/all_averaged_data.csv")
+
+ggplot(all_averaged_data, aes(x=apertureDegree, y=relativeTilt, group=Condition, color=Condition)) +
+  geom_line() +
+  geom_point() +
+  geom_errorbar(aes(ymin=relativeTilt-sd, ymax=relativeTilt+sd), width=.15, position=position_dodge(0.15)) +
+  labs(title="Optic Flow Experiment 1", x="Aperture size (deg)", y="Relative tilt (deg)")
+
+```
