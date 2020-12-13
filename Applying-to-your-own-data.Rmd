@@ -1,0 +1,623 @@
+---
+title: 'Data Wrangling and Visualization'
+author: "Haefner & DeAngelis Group"
+date: "Fall 2020"
+output:
+  pdf_document:
+    latex_engine: xelatex
+    number_sections: yes
+    toc: yes
+    toc_depth: 3
+  word_document:
+    toc: yes
+  html_document:
+    df_print: paged
+    toc: yes
+urlcolor: blue
+header-includes:
+   - \usepackage{animate}
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(
+  echo = FALSE, results = "markup", warning = TRUE, cache = FALSE,
+  fig.align = "center", fig.width = 6.5)
+```
+
+```{r libraries, include = F}
+library("tidyverse")  # dplyr, ggplot2, and more from the tidyverse
+library("magrittr")   # for pipes
+library("readxl")     # for interacting with Excel
+#library("cowplot")    # for combining figures
+#library("plotly")     # for interactive plots
+#library("ggpubr")
+
+theme_set(
+  theme_bw()
+)
+```
+
+
+# Importing data
+
+
+Subject 1 - Arya
+Subject 2 - Ji-Ze
+Subject 3 - Kepler
+Subject 4 - Yihe
+
+```{r read CSVs, message=F, warning=F}
+# get list of files from a directory
+getwd()
+setwd("/Users/yihechen/Documents/GitHub/BCS206DataWrangling/data/Haefner/newVersion")
+getwd()
+d <- read_csv(
+  "/Users/yihechen/Documents/GitHub/BCS206DataWrangling/data/Haefner/newVersion/Subject4_Exp2.csv")
+
+files = list.files(path = "/Users/yihechen/Documents/GitHub/BCS206DataWrangling/data/Haefner/newVersion", pattern = "*.csv", full.names = T)
+files
+# make an empty table that we can add the information contained in the files to
+d.motion = tibble()
+for (f in files) {
+  d.motion %<>%
+    rbind(
+      read_csv(f) %>%
+        # store filename in table (to extract subject and experiment info)
+        mutate(filename = f)) 
+}
+
+# Just like %>% pipes data forward, %<>% does the same *but* at the very end of the 
+# pipe then re-assigns the outcome of the pipe to the variable at the beginning of 
+# the pipe. So we're making some additions to d.motions and then override the original
+# content of d.motion
+d.motion %<>%
+  # rename variables
+  
+  # get experiment and subject information (by separating filename into separate columns)
+  # (this throws a warning b/c the format of filenames differs across files, but the outcome
+  # is correct)
+  separate(filename, sep = "_", into = c("subject", "experiment", "rest")) %>%
+  # clean up some variable values with regular expression 
+  mutate(
+    subject = gsub("^.*Subject(.*)$", "\\1", subject),
+    experiment = gsub("^EXP(.).*", "\\1", experiment),
+    conditionName = gsub("^(.*)(Flow|Condition)[0-9]?{0,1}", "\\1", conditionName)  # removing 1,2 and "Flow
+  ) %>%
+  # reorder columns and remove unnecessary columns
+  select(experiment, subject, trialNumber,
+         conditionName, apertureDegree, probeEccentricity, probeAngle, sceneIndex,
+         everything()) %>%
+  select(-rest) %>%
+  # make the following variables factors
+  mutate_at(
+    c("experiment", "subject", "conditionName", 
+      "apertureDegree", "probeEccentricity", "probeAngle", "sceneIndex"),
+    factor
+  ) 
+
+d.motion$apertureDegree <- factor(d.motion$apertureDegree, 
+                 levels = c(0, 1, 2, 3),
+                  labels = c("1", "1.5", "2", "4"))
+d.motion$probeEccentricity <- factor(d.motion$probeEccentricity, 
+                  levels = c(0, 1),
+                  labels = c("2", "4"))
+d.motion$subject <- factor(d.motion$subject, 
+                  levels = c(1, 2, 3, 4),
+                  labels = c("Subject 1", "Subject 2", "Subject 3", "Subject 4"))
+
+
+d.motion %>%
+  summary()
+```
+
+
+# Trial exclusions
+
+Are there any criteria that would make you think that a trial should be excluded from further analysis?
+```{r filter trials}
+d.motion %<>%
+  filter(reactionTime < 10, reactionTime > 0.5, relativeTilt < 50)
+
+d.motion%>%
+  summary()
+```
+If the reaction time for a trial is too long, then it should be removed from the dataset. The reason being, the subject could either be comtemplating or taking a break, either of which we don't want to analyze. I chose 10 seconds as the threshold.
+
+
+# Visualizing distribution
+
+## Experiment 1 distribution
+```{r histogram 1}
+d.motion %>%
+  filter(experiment == "Exp1.csv") %>%
+  ggplot(aes(x=relativeTilt)) +
+  geom_histogram() + 
+  facet_wrap(~subject)
+```
+
+## Experiment 2 distribution
+```{r histogram 2}
+d.motion %>%
+  filter(experiment == "Exp2.csv") %>%
+  ggplot(aes(x=relativeTilt)) +
+  geom_histogram() + 
+  facet_wrap(~subject)
+```
+
+# Experiment 1
+
+## Experiment 1 averaged
+```{r Exp 1 averaged}
+
+d.motion_exp1_summary1 = d.motion %>%
+  filter(experiment == "Exp1.csv", conditionName == "Global" | conditionName == "Local") %>%
+  group_by(apertureDegree, conditionName) %>%
+  summarise(
+    meanTilt = mean(relativeTilt),
+    CI.lower = mean(relativeTilt)-1.96*sd(relativeTilt)/2,
+    CI.upper = mean(relativeTilt)+1.96*sd(relativeTilt)/2)
+
+
+d.motion %>%
+  filter(experiment == "Exp1.csv", conditionName == "Full" | conditionName == "Control") %>%
+  group_by(conditionName) %>%
+  summarise(
+    meanTilt = mean(relativeTilt),
+    CI.lower = mean(relativeTilt)-1.96*sd(relativeTilt)/2,
+    CI.upper = mean(relativeTilt)+1.96*sd(relativeTilt)/2)
+
+d.motion_exp1_summary2 =  d.motion %>%
+  filter(experiment == "Exp1.csv", conditionName == "Full" | conditionName == "Control") %>%
+  group_by(apertureDegree, conditionName) %>%
+  summarise(
+    meanTilt = mean(relativeTilt),
+    CI.lower = 0,
+    CI.upper = 0)
+
+
+d.motion_exp1_summary3 = d.motion_exp1_summary2 %>%
+  filter(conditionName == "Full")
+d.motion_exp1_summary4 = d.motion_exp1_summary2 %>%
+  filter(conditionName == "Control")
+
+d.motion_exp1_summary3$meanTilt = 14.816607
+d.motion_exp1_summary3$CI.lower = 6.729863
+d.motion_exp1_summary3$CI.upper = 22.903351
+
+d.motion_exp1_summary4$meanTilt = 1.830148
+d.motion_exp1_summary4$CI.lower = -5.751021
+d.motion_exp1_summary4$CI.upper = 9.411316
+
+d.motion_exp1_summary5 <- rbind(d.motion_exp1_summary3, d.motion_exp1_summary4)
+
+d.motion_exp1_summary <- rbind(d.motion_exp1_summary1, d.motion_exp1_summary5)
+
+d.motion_exp1_summary$apertureDegree <- as.numeric(as.character(d.motion_exp1_summary$apertureDegree))
+
+
+
+
+d.motion_exp1_summary %>%
+  # Build plot
+  ggplot(aes(x = apertureDegree, y = meanTilt,  color = conditionName, group = conditionName, shape = conditionName)) +
+  
+  # Error bars
+  # Plot pointranges
+  #stat_summary(fun.data = mean_cl_normal, geom="pointrange", position = position_dodge(0.1)) +
+  geom_pointrange(aes(ymin=CI.lower, ymax=CI.upper), position=position_dodge(0.15)) +
+  # Plot lines
+  #stat_summary(fun.data = mean_cl_normal, geom="line", position = position_dodge(0.1)) +
+  geom_line(position=position_dodge(0.15)) +
+  # Change the color for each condition
+  scale_color_manual(values = c("grey40", "green4", "chocolate1", "dodgerblue2")) +
+  
+  # Add labels
+  xlab("Aperture Size (deg)") +    
+  ylab("Relative Tilt (deg)") + 
+  
+  # Add title
+  ggtitle("Relative Tilt versus Aperture Size", "Experiment 1, N = 4")  +
+  # Fix the scales
+  scale_x_continuous(breaks=c(1,1.5, 2, 4)) +
+  scale_y_continuous(limits=c(-8, 33), breaks=c(0, 10, 20, 30))+
+  # Tidy up the appearance
+  theme(legend.title = element_blank(),
+        panel.grid.minor.x = element_blank())
+
+```
+
+
+
+```{r}
+d.motion_exp1_summary %>%
+  filter(conditionName == "Full") %>%
+  # Build plot
+  
+  ggplot(aes(x = apertureDegree, y = meanTilt, color = "green4")) +
+  
+  # Error bars
+  # Plot pointranges
+  #stat_summary(fun.data = mean_cl_normal, geom="pointrange", position = position_dodge(0.1)) +
+  geom_pointrange(aes(ymin=CI.lower, ymax=CI.upper), position=position_dodge(0.15), shape=17) +
+  # Plot lines
+  #stat_summary(fun.data = mean_cl_normal, geom="line", position = position_dodge(0.1)) +
+  geom_line(position=position_dodge(0.15)) +
+  # Change the color for each condition
+  
+  # Add labels
+  xlab("Aperture Size (deg)") +    
+  ylab("Relative Tilt (deg)") + 
+  
+  # Add title
+  ggtitle("Relative Tilt versus Aperture Size", "Experiment 1, N = 4")  +
+  scale_x_continuous(breaks=c(1,1.5, 2, 4)) +
+  scale_y_continuous(limits=c(-8, 33), breaks=c(0, 10, 20, 30))+
+  scale_color_manual(labels = "Full", values = "green4") +
+  theme(legend.title = element_blank(),
+        panel.grid.minor.x = element_blank())
+```
+
+## Experiment 1 individual with stat_summary normal CIs
+```{r Exp 1 single subject}
+d.motion$apertureDegree <- as.numeric(as.character(d.motion$apertureDegree))
+
+
+d.motion %>%
+  # Select experiment 1 data
+  filter(experiment == "Exp1.csv", subject == "Subject 1") %>%
+  
+  # Build plot
+  ggplot(
+    mapping = aes(x = apertureDegree, y = relativeTilt, color = conditionName, 
+                  group = conditionName, shape = conditionName)) +
+  
+  # Error bars
+  # Plot pointrange
+  stat_summary(fun.data = mean_cl_normal, geom="pointrange", position = position_dodge(0.1)) +
+  # Plot lines
+  stat_summary(fun.data = mean_cl_normal, geom="line", position = position_dodge(0.1)) +
+  
+  # Change the color for each condition
+  scale_color_manual(values = c("grey40", "green4", "chocolate1", "dodgerblue2")) +
+  
+  # Add labels
+  xlab("Aperture Size (deg)") +    
+  ylab("Relative Tilt (deg)") + 
+  
+  # Add main title and subtitle
+  ggtitle("Relative Tilt versus Aperture Size", "Experiment 1, N = 1, Subject 3")  +
+  scale_x_continuous(breaks=c(1,1.5, 2, 4)) +
+
+  theme(legend.title = element_blank(),
+        panel.grid.minor.x = element_blank())
+
+```
+
+
+
+## Experiment 1 every individual with stat_summary normal CIs
+```{r Exp 1 four subjects, fig.width=6}
+
+d.motion %>%
+  # Select experiment 1 data
+  filter(experiment == "Exp1.csv") %>%
+  
+  # Build plot
+  ggplot(aes(x = apertureDegree, y = relativeTilt, color = conditionName, 
+             group = conditionName, shape = conditionName)) +
+  
+  # Error bars
+  # Plot pointranges
+  stat_summary(fun.data = mean_cl_normal, geom = "pointrange", position = position_dodge(.2)) +
+  
+  # Plot lines
+  stat_summary(fun.data = mean_cl_normal, geom = "line", position = position_dodge(.2)) +
+  #geom_line(position=position_dodge(0.2)) +
+  #geom_pointrange(aes(ymin=CI.lower, ymax=CI.upper), position = position_dodge(0.2)) +
+  
+  # Change the color for each condition
+  scale_color_manual(values = c("grey40", "green4", "chocolate1", "dodgerblue2")) +
+  
+  # Separate by subject
+  facet_wrap(~subject,scales = "free_y") +
+  
+  # Add labels
+  xlab("Aperture Size (deg)") +
+  ylab("Relative Tilt (deg)") +
+  
+  # Add title
+  ggtitle("Relative Tilt versus Aperture Size", "4 subjects in experiment 1")  +
+  scale_x_continuous(breaks=c(1,1.5, 2, 4)) +
+#  ylim(-10,30)+
+  theme(legend.title = element_blank(),
+        panel.grid.major.x = element_blank(),
+        panel.grid.minor.x = element_blank())
+
+```
+
+
+# Experiment 2
+
+## Experiment 2 averaged
+```{r Exp 2 averaged}
+d.motion_exp2_summary = d.motion %>%
+  filter(experiment == "Exp2.csv") %>%
+  group_by(subject, probeEccentricity, conditionName) %>%
+  summarise(
+    meanTilt = mean(relativeTilt),
+    CI.lower = quantile(relativeTilt, .025),
+    CI.upper = quantile(relativeTilt, .975)
+  )
+
+d.motion_exp2_summary
+
+d.motion_exp2_summary %>%
+  
+  # Build plot
+  ggplot(
+    mapping = aes(x = probeEccentricity, y = meanTilt, 
+                  color = conditionName, group = conditionName, shape = conditionName)) +
+  
+  # Error bars
+  # Plot pointranges
+  stat_summary(fun.data = mean_cl_normal, geom="pointrange", position = position_dodge(0.1)) +
+  
+  # Plot lines
+  stat_summary(fun.data = mean_cl_normal, geom="line", position = position_dodge(0.1)) +
+  
+  # Change the color for each condition
+  scale_color_manual(values = c("grey40", "green4", "chocolate1", "dodgerblue2")) +
+  
+  # Add labels
+  xlab("Probe Eccentricity (deg)") +    
+  ylab("Relative Tilt (deg)") + 
+  scale_y_continuous(limits=c(-5.1, 20.1), breaks=c(-5, 0, 5, 10,15, 20))+
+  
+  # Add title
+  ggtitle("Relative Tilt versus Probe Eccentricity ", "Experiment 2, N = 4")  +
+  theme(legend.title = element_blank(), panel.grid.minor.y = element_blank())
+
+```
+
+```{r}
+d.motion_exp2_summary = d.motion %>%
+  filter(experiment == "Exp2.csv") %>%
+  group_by(subject, probeEccentricity, conditionName) %>%
+  summarise(
+    meanTilt = mean(relativeTilt),
+    CI.lower = quantile(relativeTilt, .025),
+    CI.upper = quantile(relativeTilt, .975)
+  )
+
+d.motion_exp2_summary
+
+d.motion_exp2_summary %>%
+  
+  # Build plot
+  ggplot(
+    mapping = aes(x = probeEccentricity, y = meanTilt, 
+                  color = conditionName, group = conditionName, shape = conditionName)) +
+  
+  # Error bars
+  # Plot pointranges
+  stat_summary(fun.data = mean_cl_normal, geom="pointrange", position = position_dodge(0.1)) +
+  
+  # Plot lines
+  stat_summary(fun.data = mean_cl_normal, geom="line", position = position_dodge(0.1)) +
+  
+  # Change the color for each condition
+  scale_color_manual(values = c("white", "white", "white", "white")) +
+  
+  # Add labels
+  xlab("Probe Eccentricity (deg)") +    
+  ylab("Relative Tilt (deg)") + 
+  scale_y_continuous(limits=c(-5.1, 20.1), breaks=c(-5, 0, 5, 10,15, 20))+
+  
+  # Add title
+  ggtitle("Relative Tilt versus Probe Eccentricity ", "Experiment 2, N = 4")  +
+  theme(legend.title = element_blank(),
+        panel.grid = element_blank())
+```
+
+```{r}
+d.motion_exp2_summary %>%
+  filter(conditionName=="Control") %>%
+  # Build plot
+  ggplot(aes(x = probeEccentricity, y = meanTilt, color = conditionName,group = conditionName, shape = conditionName)) +
+  
+  # Error bars
+  # Plot pointranges
+  stat_summary(fun.data = mean_cl_normal, geom="pointrange", position = position_dodge(0.1)) +
+  
+  # Plot lines
+  stat_summary(fun.data = mean_cl_normal, geom="line", position = position_dodge(0.1)) +
+  
+  # Change the color for each condition
+ # scale_color_manual(values = c("grey40", "green4", "chocolate1", "dodgerblue2")) +
+  
+  # Add labels
+  xlab("Probe Eccentricity (deg)") +    
+  ylab("Relative Tilt (deg)") + 
+  
+  # Add title
+  ggtitle("Relative Tilt versus Probe Eccentricity ", "Experiment 2, N = 4")  +
+  scale_y_continuous(limits=c(-5.1, 20.1), breaks=c(-5, 0, 5, 10,15, 20))+
+  scale_color_manual(labels = c("Control"), values = c("grey40"))+
+  theme(legend.title = element_blank(), panel.grid.minor.y = element_blank())
+
+```
+```{r}
+d.motion_exp2_summary %>%
+  filter(conditionName=="Opposite" | conditionName=="Control") %>%
+  # Build plot
+  ggplot(aes(x = probeEccentricity, y = meanTilt, color = conditionName,group = conditionName, shape = conditionName)) +
+  
+  # Error bars
+  # Plot pointranges
+  stat_summary(fun.data = mean_cl_normal, geom="pointrange", position = position_dodge(0.1)) +
+  
+  # Plot lines
+  stat_summary(fun.data = mean_cl_normal, geom="line", position = position_dodge(0.1)) +
+  
+  # Change the color for each condition
+ # scale_color_manual(values = c("grey40", "green4", "chocolate1", "dodgerblue2")) +
+  
+  # Add labels
+  xlab("Probe Eccentricity (deg)") +    
+  ylab("Relative Tilt (deg)") + 
+  
+  # Add title
+  ggtitle("Relative Tilt versus Probe Eccentricity ", "Experiment 2, N = 4")  +
+  scale_y_continuous(limits=c(-5.1, 20.1), breaks=c(-5, 0, 5, 10,15, 20))+
+  scale_color_manual(labels = c("Control","Opposite"), values = c("grey40","chocolate1"), ) +
+  scale_shape_manual(values=c(16, 15))+
+  theme(legend.title = element_blank(), panel.grid.minor.y = element_blank())
+```
+
+```{r}
+
+d.motion_exp2_summary %>%
+  filter(conditionName=="Full" | conditionName=="Same") %>%
+  # Build plot
+  ggplot(aes(x = probeEccentricity, y = meanTilt, color = conditionName,group = conditionName, shape = conditionName)) +
+  
+  # Error bars
+  # Plot pointranges
+  stat_summary(fun.data = mean_cl_normal, geom="pointrange", position = position_dodge(0.1)) +
+  
+  # Plot lines
+  stat_summary(fun.data = mean_cl_normal, geom="line", position = position_dodge(0.1)) +
+  
+  # Change the color for each condition
+ # scale_color_manual(values = c("grey40", "green4", "chocolate1", "dodgerblue2")) +
+  
+  # Add labels
+  xlab("Probe Eccentricity (deg)") +    
+  ylab("Relative Tilt (deg)") + 
+  
+  # Add title
+  ggtitle("Relative Tilt versus Probe Eccentricity ", "Experiment 2, N = 4")  +
+  scale_y_continuous(limits=c(-5.1, 20.1), breaks=c(-5, 0, 5, 10,15, 20))+
+  scale_color_manual(labels = c("Full","Same"), values = c("green4","dodgerblue2"), ) +
+  scale_shape_manual(values=c(17, 3))+
+  theme(legend.title = element_blank(), panel.grid.minor.y = element_blank())
+
+```
+
+
+## Experiment 2 individual with stat_summary normal CIs
+```{r Exp 2 single subjects}
+
+d.motion %>%
+  # Select experiment 2 data
+  filter(experiment == "Exp2.csv", subject == "Subject 3") %>%
+
+  # Build plot
+  ggplot(
+    mapping = aes(x = probeEccentricity, y = relativeTilt, color = conditionName, 
+                  group = conditionName, shape = conditionName)) +
+  
+  # Error bars
+  # Plot pointranges
+  stat_summary(fun.data = mean_cl_normal, geom="pointrange", position = position_dodge(0.1)) +
+  # Plot lines
+  stat_summary(fun.data = mean_cl_normal, geom="line", position = position_dodge(0.1)) +
+  
+  # Change the color for each condition
+  scale_color_manual(values = c("grey40", "green4", "chocolate1", "dodgerblue2")) +
+  
+  # Add labels
+  xlab("Aperture Size (deg)") +    
+  ylab("Relative Tilt (deg)") + 
+  
+  # Add titles
+  ggtitle("Relative Tilt versus Aperture Size", "N = 1   Subject 3")  +
+  theme(legend.title = element_blank())
+
+```
+
+
+
+## Experiment 2 every individual with stat_summary normal CIs
+```{r Exp 2 four subjects, fig.width=6}
+
+d.motion %>%
+  # Select experiment 2 data
+  filter(experiment == "Exp2.csv") %>%
+  
+  # Build plot
+  ggplot(aes(x = probeEccentricity, y = relativeTilt, color = conditionName, 
+             group = conditionName, shape = conditionName)) +
+  
+  # Error bars
+  # Plot pointranges
+  stat_summary(fun.data = mean_cl_normal, geom = "pointrange", position = position_dodge(.2)) +
+  
+  # Plot lines
+  stat_summary(fun.data = mean_cl_normal, geom = "line", position = position_dodge(.2)) +
+  #geom_line(position=position_dodge(0.2)) +
+  #geom_pointrange(aes(ymin=CI.lower, ymax=CI.upper), position = position_dodge(0.2)) +
+  
+  # Change the color for each condition
+  scale_color_manual(values = c("grey40", "green4", "chocolate1", "dodgerblue2")) +
+  
+  # Separate by subject
+  facet_wrap(~subject) +
+  
+  # Add labels
+  xlab("Aperture Size (deg)") +
+  ylab("Relative Tilt (deg)") +
+  
+  # Add title
+  ggtitle("Relative Tilt versus Aperture Size", "4 subjects in experiment 2") +
+  theme(legend.title = element_blank())
+  
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+# Other
+
+## Exp 2
+```{r RelativeTilt vs probeAngle}
+d.motion %>%
+  filter(experiment == "Exp2.csv", subject == 4, conditionName == "Opposite") %>%
+  group_by(probeAngle, probeEccentricity) %>%
+  ggplot(aes(x = probeEccentricity, y = relativeTilt, color = probeAngle, 
+             group = probeAngle, shape = probeAngle)) +
+  stat_summary(fun.data = mean_cl_normal, geom="pointrange", position = position_dodge(0.05)) +
+  stat_summary(fun.data = mean_cl_normal, geom="line", position = position_dodge(0.05)) +
+  scale_color_manual(values = c("grey40", "green4", "chocolate1", "dodgerblue2")) +
+  xlab("eccentricity (deg)") +
+  ylab("Relative Tilt (deg)")
+
+```
+
+
+
+## Plotting changes across trials
+
+Some of you also plotted changes across trials. Arya, for example, looked at changes in RTs across trials. Try to plot changes in the relative tilt effect across trials. Here's a plot for Subject 1 in Experiment 1. **How would you combine the data from subjects 1-3 from Experiment 1 and then plot an average for those subjects?** Hint: you don't need to do any manual averaging. Look into geom_smooth, which let's you plot trend lines.
+
+
+
