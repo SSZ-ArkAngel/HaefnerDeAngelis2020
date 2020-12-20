@@ -126,46 +126,49 @@ organized_data %>%
 
 # Experiment 1
 
-## Experiment 1 averaged
+## Experiment 1 averaged (ribbons)
 ```{r Exp 1 averaged}
 
 organized_data %>%
   filter(experiment == "1") %>%
   group_by(subject, conditionName, apertureDegree) %>%
   summarise(relativeTilt = mean(relativeTilt)) %>%
-  ggplot(aes(x = as.numeric(apertureDegree), y = relativeTilt)) +
+  ggplot(aes(x = as.numeric(apertureDegree), y = relativeTilt, shape = conditionName)) + # color: to maintain coherence in legend
   # geom_point(alpha = 0.3) +
   stat_summary(
-    data = . %>%
+    data = . %>% # . indicates the data frame
       filter(!(conditionName %in% c("Global", "Local"))) %>%
       group_by(subject, conditionName) %>%
       mutate(relativeTilt = mean(relativeTilt)), 
-    mapping = aes(fill = conditionName), fun.data = mean_cl_normal, geom = "ribbon", alpha = 0.1, show.legend = FALSE) +
+    mapping = aes(fill = conditionName), fun.data = mean_cl_normal, geom = "ribbon", alpha = 0.1, show.legend = FALSE) + # or mean_cl_boot
   stat_summary(
-    data = . %>%
+    data = . %>% # . indicates the data frame
       filter(!(conditionName %in% c("Global", "Local"))) %>%
       group_by(subject, conditionName) %>%
       mutate(relativeTilt = mean(relativeTilt)), 
-    mapping = aes(group = conditionName), fun.data = mean_cl_normal, geom = "line", linetype = "dashed", alpha = 0.3, show.legend = FALSE) +
+    mapping = aes(group = conditionName), fun.data = mean_cl_normal, geom = "line", linetype = "dashed", alpha = 0.3, show.legend = FALSE) + # or mean_cl_boot
   
   stat_summary(
-    data = . %>%
+    data = . %>% # . indicates the data frame
       filter(conditionName %in% c("Global", "Local")), 
-    mapping = aes(color = conditionName), fun.data = mean_cl_normal, geom = "pointrange", position = position_dodge(0.1)) +
+    mapping = aes(color = conditionName), fun.data = mean_cl_normal, geom = "pointrange", position = position_dodge(0.1)) + # or mean_cl_boot
   stat_summary(
-    data = . %>%
+    data = . %>% # . indicates the data frame
       filter(conditionName %in% c("Global", "Local")), 
-    mapping = aes(color = conditionName), fun.data = mean_cl_normal, geom = "line", position = position_dodge(0.1)) +
+    mapping = aes(color = conditionName), fun.data = mean_cl_normal, geom = "line", position = position_dodge(0.1)) + # or mean_cl_boot
   
   scale_color_manual(
     name = "Condition",
     breaks = levels(organized_data$conditionName),
-    values = c("grey40", "green4", "chocolate1", "dodgerblue2"),
+    values = c("grey40", "green4", "chocolate1", "dodgerblue2"), # CHANGE!!!!! gray?
     drop = FALSE) +
   scale_fill_manual(
     breaks = levels(organized_data$conditionName),
-    values = c("grey40", "green4", "chocolate1", "dodgerblue2"),
+    values = c("grey40", "green4", "chocolate1", "dodgerblue2"), # CHANGE!!!!! gray?
     ) +
+  
+  guides(colour = guide_legend(override.aes = list(shape = c(16, 17, 15, 3)))) +
+  scale_shape(guide = FALSE) +
   
   # Add labels
   xlab("Aperture Size (deg)") +    
@@ -183,6 +186,60 @@ organized_data %>%
         panel.grid.minor.x = element_blank())
 ```
 
+## Experiment 1 averaged (point at aperture size = 0)
+```{r Exp 1 averaged}
+
+organized_data %>%
+  filter(experiment == "1") %>%
+  group_by(subject, conditionName, apertureDegree) %>%
+  summarise(relativeTilt = mean(relativeTilt)) %>%
+  ggplot(aes(x = as.numeric(apertureDegree), y = relativeTilt, color = conditionName, shape = conditionName)) + # color: to maintain coherence in legend
+  # geom_point(alpha = 0.3) +
+  stat_summary(
+    data = . %>% # . indicates the data frame
+      filter(!(conditionName %in% c("Global", "Local"))) %>%
+      group_by(subject, conditionName) %>%
+      mutate(relativeTilt = mean(relativeTilt), apertureDegree = 0), 
+    mapping = aes(group = conditionName), fun.data = mean_cl_normal, geom = "pointrange") + # or mean_cl_boot
+  
+  stat_summary(
+    data = . %>% # . indicates the data frame
+      filter(conditionName %in% c("Global", "Local")), 
+    mapping = aes(group = conditionName), fun.data = mean_cl_normal, geom = "pointrange", position = position_dodge(0.1)) + # or mean_cl_boot
+  stat_summary(
+    data = . %>% # . indicates the data frame
+      filter(conditionName %in% c("Global", "Local")), 
+    mapping = aes(group = conditionName), fun.data = mean_cl_normal, geom = "line", position = position_dodge(0.1)) + # or mean_cl_boot
+  
+  scale_color_manual(
+    name = "Condition",
+    breaks = levels(organized_data$conditionName),
+    values = c("grey40", "green4", "chocolate1", "dodgerblue2"), # CHANGE!!!!! gray?
+    drop = FALSE) +
+  scale_fill_manual(
+    breaks = levels(organized_data$conditionName),
+    values = c("grey40", "green4", "chocolate1", "dodgerblue2"), # CHANGE!!!!! gray?
+    ) +
+  
+  # 
+  guides(colour = guide_legend(override.aes = list(shape = c(16, 17, 15, 3)))) +
+  scale_shape(guide = FALSE) +
+  
+  # Add labels
+  xlab("Aperture Size (deg)") +    
+  ylab("Relative Tilt (deg)") + 
+  
+  # Add title
+  ggtitle("Relative Tilt versus Aperture Size", "Experiment 1, N = 4") +
+  
+  # Fix the scales
+  scale_x_continuous(breaks = c(0, 1,1.5, 2, 4)) +
+  scale_y_continuous(limits = c(-8, 33), breaks = c(0, 10, 20, 30)) +
+  
+  # Tidy up the appearance
+  theme(legend.title = element_blank(),
+        panel.grid.minor.x = element_blank())
+```
 
 
 
